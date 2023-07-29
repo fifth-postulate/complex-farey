@@ -1,1 +1,1 @@
-mod farey;
+pub mod farey;

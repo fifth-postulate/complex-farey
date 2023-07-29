@@ -2,7 +2,7 @@ use std::convert::From;
 use std::ops::Add;
 use std::ops::Mul;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct Fraction<T> {
     numerator: T,
     denominator: T,
@@ -56,6 +56,20 @@ where
         )
     }
 }
+
+impl<T> Clone for Fraction<T>
+where
+    T: Clone,
+{
+    fn clone(&self) -> Self {
+        Self {
+            numerator: self.numerator.clone(),
+            denominator: self.denominator.clone(),
+        }
+    }
+}
+
+impl<T> Copy for Fraction<T> where T: Copy + Clone {}
 
 macro_rules! impl_from_tuple {
     ($a_type:ty) => {

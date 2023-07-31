@@ -1,4 +1,4 @@
-use farey::farey::Fraction;
+use farey::fraction::Fraction;
 use clap::{Parser};
 
 #[derive(Parser)]

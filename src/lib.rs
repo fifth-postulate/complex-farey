@@ -1,1 +1,2 @@
-pub mod farey;
+pub mod fraction;
+

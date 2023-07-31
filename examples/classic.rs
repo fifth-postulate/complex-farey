@@ -1,10 +1,20 @@
 use farey::farey::Fraction;
+use clap::{Parser};
+
+#[derive(Parser)]
+#[command(author, version, about, long_about = None)]
+struct Cli {
+    n: u8
+}
+
 
 pub fn main() {
+    let cli = Cli::parse();
+
     let start: Vec<Fraction<u64>> = vec![(0, 1).into(), (1, 1).into()];
 
     let mut current = start;
-    for _ in 0..5 {
+    for _ in 1..cli.n {
         current = mediants(current);
     }
 

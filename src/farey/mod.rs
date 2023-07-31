@@ -1,4 +1,5 @@
 use std::convert::From;
+use std::fmt::{Display, Formatter};
 use std::ops::Add;
 use std::ops::Mul;
 
@@ -70,6 +71,15 @@ where
 }
 
 impl<T> Copy for Fraction<T> where T: Copy + Clone {}
+
+impl<T> Display for Fraction<T>
+where
+    T: Display,
+{
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_fmt(format_args!("{}/{}", self.numerator, self.denominator))
+    }
+}
 
 macro_rules! impl_from_tuple {
     ($a_type:ty) => {

@@ -1,8 +1,7 @@
 use crate::gcd::Gcd;
 use std::convert::From;
 use std::fmt::{Display, Formatter};
-use std::ops::Add;
-use std::ops::Mul;
+use std::ops::{Add, Mul, Neg, Sub};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Fraction<T> {
@@ -59,6 +58,28 @@ where
             self.numerator * rhs.numerator,
             self.denominator * rhs.denominator,
         )
+    }
+}
+
+impl<T> Neg for Fraction<T>
+where
+    T: Neg<Output = T> + Gcd,
+{
+    type Output = Self;
+
+    fn neg(self) -> Self::Output {
+        Self::new(self.numerator.neg(), self.denominator)
+    }
+}
+
+impl<T> Sub for Fraction<T>
+where
+    T: Neg<Output = T> + Add<Output = T> + Mul<Output = T> + Copy + Gcd,
+{
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        self.add(rhs.neg())
     }
 }
 

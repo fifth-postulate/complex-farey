@@ -1,3 +1,4 @@
+use crate::gcd::Gcd;
 use std::convert::From;
 use std::fmt::{Display, Formatter};
 use std::ops::Add;
@@ -9,7 +10,10 @@ pub struct Fraction<T> {
     denominator: T,
 }
 
-impl<T> Fraction<T> {
+impl<T> Fraction<T>
+where
+    T: Gcd,
+{
     pub fn new(numerator: T, denominator: T) -> Fraction<T> {
         Fraction {
             numerator,
@@ -20,7 +24,7 @@ impl<T> Fraction<T> {
 
 impl<T> Fraction<T>
 where
-    T: Add<Output = T>,
+    T: Add<Output = T> + Gcd,
 {
     pub fn mediant(self, rhs: Self) -> Self {
         Fraction::new(
@@ -32,7 +36,7 @@ where
 
 impl<T> Add for Fraction<T>
 where
-    T: Add<Output = T> + Mul<Output = T> + Copy,
+    T: Add<Output = T> + Mul<Output = T> + Gcd + Copy,
 {
     type Output = Self;
 
@@ -46,7 +50,7 @@ where
 
 impl<T> Mul for Fraction<T>
 where
-    T: Mul<Output = T>,
+    T: Mul<Output = T> + Gcd,
 {
     type Output = Self;
 

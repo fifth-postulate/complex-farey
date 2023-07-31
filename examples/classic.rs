@@ -1,12 +1,11 @@
+use clap::Parser;
 use farey::fraction::Fraction;
-use clap::{Parser};
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 struct Cli {
-    n: u8
+    n: u8,
 }
-
 
 pub fn main() {
     let cli = Cli::parse();

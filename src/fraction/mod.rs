@@ -1,9 +1,9 @@
 use crate::gcd::Gcd;
 use std::convert::From;
 use std::fmt::{Display, Formatter};
-use std::ops::{Add, Mul, Neg, Sub};
+use std::ops::{Add, Div, Mul, Neg, Sub};
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub struct Fraction<T> {
     numerator: T,
     denominator: T,
@@ -13,11 +13,15 @@ impl<T> Fraction<T>
 where
     T: Gcd,
 {
-    pub fn new(numerator: T, denominator: T) -> Fraction<T> {
-        Fraction {
+    pub fn new(numerator: T, denominator: T) -> Self {
+        Self {
             numerator,
             denominator,
         }
+    }
+
+    pub fn invert(self) -> Self {
+        Self::new(self.denominator, self.numerator)
     }
 }
 
@@ -83,19 +87,17 @@ where
     }
 }
 
-impl<T> Clone for Fraction<T>
+impl<T> Div<Self> for Fraction<T>
 where
-    T: Clone,
+    T: Mul<Output = T> + Gcd,
 {
-    fn clone(&self) -> Self {
-        Self {
-            numerator: self.numerator.clone(),
-            denominator: self.denominator.clone(),
-        }
+    type Output = Self;
+
+    #[allow(clippy::suspicious_arithmetic_impl)]
+    fn div(self, rhs: Self) -> Self::Output {
+        self * rhs.invert()
     }
 }
-
-impl<T> Copy for Fraction<T> where T: Copy + Clone {}
 
 impl<T> Display for Fraction<T>
 where

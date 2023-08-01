@@ -1,9 +1,10 @@
+use crate::gcd::Gcd;
 use num::Zero;
 use std::convert::From;
 use std::fmt::{Display, Formatter};
-use std::ops::{Add, Mul, Neg, Sub};
+use std::ops::{Add, Div, Mul, Neg, Rem, Sub};
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Copy, Clone)]
 pub struct Gaussian<T> {
     real: T,
     complex: T,
@@ -12,6 +13,69 @@ pub struct Gaussian<T> {
 impl<T> Gaussian<T> {
     pub fn new(real: T, complex: T) -> Self {
         Self { real, complex }
+    }
+}
+
+impl<T> Gaussian<T>
+where
+    T: Add<Output = T> + Mul<Output = T> + Copy,
+{
+    pub fn norm(&self) -> T {
+        self.real * self.real + self.complex * self.complex
+    }
+}
+
+impl<T> Gaussian<T>
+where
+    T: Add<Output = T>
+        + Mul<Output = T>
+        + Sub<Output = T>
+        + Div<Output = T>
+        + Rem<Output = T>
+        + Neg<Output = T>
+        + Copy,
+{
+    fn quo_rem(self, rhs: Self) -> (Self, Self) {
+        let n = rhs.norm();
+        let a = self.real * rhs.real + self.complex * rhs.complex;
+        let b = self.complex * rhs.real - self.real * rhs.complex;
+
+        let q = Self::new(a / n, b / n);
+        let r = Self::new(a % n, b % n);
+
+        (q, r)
+    }
+}
+
+impl<T> Gcd for Gaussian<T>
+where
+    T: Add<Output = T>
+        + Mul<Output = T>
+        + Sub<Output = T>
+        + Div<Output = T>
+        + Rem<Output = T>
+        + Neg<Output = T>
+        + Zero
+        + Copy,
+{
+    fn gcd(self, rhs: Self) -> Self {
+        if rhs.is_zero() {
+            self
+        } else {
+            rhs.gcd(self % rhs)
+        }
+    }
+}
+impl<T> Zero for Gaussian<T>
+where
+    T: Zero,
+{
+    fn zero() -> Self {
+        Self::new(T::zero(), T::zero())
+    }
+
+    fn is_zero(&self) -> bool {
+        self.real.is_zero() && self.complex.is_zero()
     }
 }
 
@@ -62,6 +126,44 @@ where
     }
 }
 
+impl<T> Div for Gaussian<T>
+where
+    T: Add<Output = T>
+        + Mul<Output = T>
+        + Sub<Output = T>
+        + Div<Output = T>
+        + Rem<Output = T>
+        + Neg<Output = T>
+        + Copy,
+{
+    type Output = Gaussian<T>;
+
+    fn div(self, rhs: Self) -> Self::Output {
+        let (q, _) = self.quo_rem(rhs);
+
+        q
+    }
+}
+
+impl<T> Rem for Gaussian<T>
+where
+    T: Add<Output = T>
+        + Mul<Output = T>
+        + Sub<Output = T>
+        + Div<Output = T>
+        + Rem<Output = T>
+        + Neg<Output = T>
+        + Copy,
+{
+    type Output = Gaussian<T>;
+
+    fn rem(self, rhs: Self) -> Self::Output {
+        let (_, r) = self.quo_rem(rhs);
+
+        r
+    }
+}
+
 impl<T> Display for Gaussian<T>
 where
     T: Display + Zero,
@@ -75,6 +177,16 @@ where
             f.write_fmt(format_args!("{}+{}i", self.real, self.complex))
         }
     }
+}
+
+macro_rules! impl_from {
+    ($a_type:ty) => {
+        impl From<$a_type> for Gaussian<$a_type> {
+            fn from(t: $a_type) -> Self {
+                Gaussian::new(t, 0)
+            }
+        }
+    };
 }
 
 macro_rules! impl_from_tuple {
@@ -98,6 +210,17 @@ impl_from_tuple!(u32);
 impl_from_tuple!(u64);
 impl_from_tuple!(u128);
 
+impl_from!(i8);
+impl_from!(i16);
+impl_from!(i32);
+impl_from!(i64);
+impl_from!(i128);
+impl_from!(u8);
+impl_from!(u16);
+impl_from!(u32);
+impl_from!(u64);
+impl_from!(u128);
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -120,6 +243,28 @@ mod tests {
         let right: Gaussian<i32> = (3, 4).into();
 
         let actual = left * right;
+
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn gaussian_integers_can_be_divided() {
+        let expected: Gaussian<i64> = (2, 1).into();
+        let left: Gaussian<i64> = 5i64.into();
+        let right: Gaussian<i64> = (2, -1).into();
+
+        let actual = left / right;
+
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn gaussian_integers_have_gcd() {
+        let expected: Gaussian<i64> = (2, 1).into();
+        let left: Gaussian<i64> = 5i64.into();
+        let right: Gaussian<i64> = (2, 1).into();
+
+        let actual = left.gcd(right);
 
         assert_eq!(actual, expected);
     }

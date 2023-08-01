@@ -1,3 +1,3 @@
 pub mod fraction;
-mod gaussian;
+pub mod gaussian;
 pub mod gcd;
